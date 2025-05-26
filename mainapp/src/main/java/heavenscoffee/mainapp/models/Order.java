@@ -1,0 +1,70 @@
+package heavenscoffee.mainapp.models;
+
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "orders")
+public class Order {
+
+  @Id
+  private String id = UUID.randomUUID().toString();
+  private String userId;
+  private Date tanggalPemesanan;
+  private String alamat;
+
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<OrderItem> orderItems;
+
+  private String metodePembayaran;
+  private int totalTagihan;
+  private Date tanggalPembayaran;
+  private String statusOrder;
+
+  @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+  @JsonManagedReference
+  private Payment payment;
+
+  private int hitungTotalTagihan() {
+    int total = 0;
+    for (OrderItem item : orderItems) {
+      total += item.getTotalHarga();
+    }
+    return total;
+  }
+
+  public void updateOrderStatus(String statusOrder) {
+    this.statusOrder = statusOrder;
+  }
+
+  public void createShipping() {
+    // this.shipping = new Shipping(id, alamat);
+  }
+
+  public void createPayment() {
+    // this.payment = new Payment(id, metodePembayaran, totalTagihan,
+    // tanggalPembayaran, statusOrder);
+  }
+
+}

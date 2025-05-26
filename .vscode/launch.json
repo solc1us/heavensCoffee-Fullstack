@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-MainappApplication<mainapp>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "heavenscoffee.mainapp.MainappApplication",
+      "projectName": "mainapp",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
