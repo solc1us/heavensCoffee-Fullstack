@@ -29,7 +29,7 @@ public class OrderItem {
     @Id
     private String id = UUID.randomUUID().toString();
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
     @JsonBackReference
     private Cart cart;

@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +28,6 @@ import heavenscoffee.mainapp.dto.RequestedItem;
 import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.models.OrderItem;
 import heavenscoffee.mainapp.models.Product;
-import heavenscoffee.mainapp.models.Order;
-import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.repos.OrderRepo;
 import heavenscoffee.mainapp.repos.ProductRepo;
 import heavenscoffee.mainapp.utils.MessageModel;
@@ -67,7 +66,7 @@ public class OrderController {
 
       List<OrderItem> orderItems = new ArrayList<>();
       for (RequestedItem itemDto : orderRequest.getItems()) {
-        // 3. Ambil Product dari database (misal via productService)
+        
         Optional<Product> optProduct = productRepo.findById(itemDto.getProductId());
         
         if (optProduct.isEmpty()) {
@@ -78,12 +77,12 @@ public class OrderController {
         Product product = optProduct.get();
 
         if (product.getStok() < itemDto.getQuantity()) {
-          return ResponseEntity.badRequest().body("Stok tidak cukup untuk produk: " + product.getNama());
+          msg.setMessage("Stok tidak cukup untuk produk: " + product.getNama());
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
         }
 
-        // 5. Buat OrderItem
         OrderItem orderItem = new OrderItem();
-        orderItem.setProduct(product); // atau cuma productId dan info relevan lainnya
+        orderItem.setProduct(product);
         orderItem.setKuantitas(itemDto.getQuantity());
         orderItem.setHargaSatuan(product.getHarga());
         orderItem.setTotalHarga(itemDto.getQuantity() * product.getHarga());
@@ -155,8 +154,7 @@ public class OrderController {
       @RequestParam(value = "page", defaultValue = "0") Integer page,
       @RequestParam(value = "size", defaultValue = "10") Integer size,
       @RequestParam(value = "sort", required = false) String sort,
-      @RequestParam(value = "urutan", required = false) String urutan,
-      @RequestParam(value = "tipe", required = false) String tipe) {
+      @RequestParam(value = "urutan", required = false) String urutan) {
     MessageModelPagination msg = new MessageModelPagination();
     try {
       Sort objSort = sortingAndAscendingDescending.getSortingData(sort, urutan);
