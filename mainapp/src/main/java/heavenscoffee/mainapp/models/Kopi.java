@@ -23,6 +23,10 @@ public class Kopi extends Product {
     this.kategori = kategori;
   }
 
+  public void setKategori(String kategori) {
+    this.kategori = kategori;
+  }
+
   public void setStok(int stok) {
     super.setStok(stok);
   }
