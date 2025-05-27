@@ -26,6 +26,7 @@ public class User {
   private String password;
   private String email;
   private String nomorHp;
+  private String cartId;
   private int role;
 
 }

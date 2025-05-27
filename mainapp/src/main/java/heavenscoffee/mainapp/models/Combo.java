@@ -17,8 +17,6 @@ import lombok.Setter;
 // @Table(name = "combo")
 public class Combo extends Product {
 
-    
-
     // public Combo(String nama, String deskripsi, int harga, int stok) {
     //     super(nama, deskripsi, harga, stok);
     // }

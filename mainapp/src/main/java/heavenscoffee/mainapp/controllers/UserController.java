@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import heavenscoffee.mainapp.models.User;
+import heavenscoffee.mainapp.repos.CartRepo;
 import heavenscoffee.mainapp.repos.UserRepo;
 import heavenscoffee.mainapp.utils.MessageModel;
 import heavenscoffee.mainapp.utils.MessageModelPagination;
@@ -25,8 +26,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-
 
 
 @RestController
@@ -34,10 +35,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class UserController {
 
   @Autowired
+  CartRepo cartRepo;
+
+  @Autowired
   UserRepo userRepo;
 
   @Autowired
   SortingAndAscendingDescending sortingAndAscendingDescending;
+
+    UserController(CartRepo cartRepo) {
+        this.cartRepo = cartRepo;
+    }
 
   @PostMapping("/create")
   public ResponseEntity<Object> createUser(@RequestBody User data) {
@@ -132,9 +140,33 @@ public class UserController {
     }
   }
 
+  @DeleteMapping("/deletebyid/{id}")
+  public ResponseEntity<Object> deleteById(@PathVariable String id) {
+    MessageModel msg = new MessageModel();
+    try {
+      Optional<User> user = userRepo.findById(id);
+      if (user.isEmpty()) {
+        msg.setMessage("User tidak ditemukan");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+      }
+      userRepo.delete(user.get());
+      cartRepo.findById(user.get().getCartId()).ifPresent(cart -> cartRepo.delete(cart));
+      msg.setMessage("User berhasil dihapus");
+      msg.setData(user.get());
+      return ResponseEntity.status(HttpStatus.OK).body(msg);
+    } catch (Exception e) {
+      msg.setMessage(e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
+    }
+  }
+
   @DeleteMapping("/deletebatch")
   public ResponseEntity<Object> deleteItems(@RequestBody List<User> id) {
     userRepo.deleteAll(id);
+    for (int i = 0; i < id.size(); i++) {
+      String userId = id.get(i).getId();
+      cartRepo.findById(userId).ifPresent(cart -> cartRepo.delete(cart));
+    }
     return ResponseEntity.status(HttpStatus.OK).body("Semua item berhasil dihapus");
   }
   

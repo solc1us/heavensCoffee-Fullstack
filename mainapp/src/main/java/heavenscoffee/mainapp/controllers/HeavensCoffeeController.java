@@ -17,6 +17,7 @@ import heavenscoffee.mainapp.models.Cart;
 import heavenscoffee.mainapp.models.User;
 import heavenscoffee.mainapp.repos.UserRepo;
 import heavenscoffee.mainapp.services.CartService;
+import heavenscoffee.mainapp.services.HeavensCoffeeService;
 import heavenscoffee.mainapp.services.ProductService;
 import heavenscoffee.mainapp.services.UserService;
 import heavenscoffee.mainapp.utils.MessageModel;
@@ -27,6 +28,9 @@ public class HeavensCoffeeController {
 
   @Autowired
   UserRepo userRepo;
+
+  @Autowired
+  HeavensCoffeeService heavensCoffeeService;
 
   @PostMapping("/login")
   public ResponseEntity<Object> loginUser(@RequestBody User data) {
@@ -85,6 +89,10 @@ public class HeavensCoffeeController {
       user.setEmail(data.getEmail());
       user.setNomorHp(data.getNomorHp());
       user.setRole(1); // Default role as customer
+
+      String cartId = heavensCoffeeService.initializeCart(user);
+
+      user.setCartId(cartId);
 
       userRepo.save(user);
 
