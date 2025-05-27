@@ -1,6 +1,6 @@
 package heavenscoffee.mainapp.models;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +31,7 @@ public class Order {
   @Id
   private String id = UUID.randomUUID().toString();
   private String userId;
-  private Date tanggalPemesanan;
+  private LocalDateTime tanggalPemesanan;
   private String alamat;
 
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -39,7 +39,7 @@ public class Order {
 
   private String metodePembayaran;
   private int totalTagihan;
-  private Date tanggalPembayaran;
+  private LocalDateTime tanggalPembayaran;
   private String statusOrder;
 
   @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)

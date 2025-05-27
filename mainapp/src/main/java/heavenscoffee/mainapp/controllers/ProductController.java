@@ -245,53 +245,8 @@ public class ProductController {
     MessageModel msg = new MessageModel();
 
     try {
-      // if (idUsers.isEmpty() || idUsers.trim().length() < 1 || idUsers.isBlank()) {
-      // msg.setMessage("'idUsers' is required in the request param.");
-      // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
-      // }
-      // if (dateTo != null && dateFrom == null) {
-      // msg.setMessage("'dateFrom' is required if you insert 'dateTo'.");
-      // return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
-      // }
 
       List<Product> products = new ArrayList<>();
-      // List<Product> product = productRepo.findByIdUsers(idUsers);
-      // List<Product> filteredProducts = new ArrayList<>(product);
-
-      // if (arus != null && !arus.isEmpty()) {
-      // filteredProducts.retainAll(budgetEaseService.findProductByArus(filteredProducts,
-      // arus));
-      // }
-      // if (dateFrom != null) {
-      // if (dateTo == null) {
-      // dateTo = dateFrom;
-      // }
-      // filteredProducts.retainAll(budgetEaseService.findProductByDateRange(filteredProducts,
-      // dateFrom, dateTo));
-      // }
-      // if (kategori != null && !kategori.isEmpty()) {
-      // filteredProducts.retainAll(budgetEaseService.findProductByKategori(filteredProducts,
-      // kategori));
-      // }
-
-      // Collections.sort(filteredProducts,
-      // Comparator.comparing(Product::getTanggal).reversed());
-
-      // Collections.sort(filteredProducts, (c1, c2) -> {
-      // // First, compare by 'tanggal' field
-      // int compareTanggal = c1.getTanggal().compareTo(c2.getTanggal());
-
-      // // If 'tanggal' fields are equal, then compare by 'dateCreated' field in
-      // reverse
-      // // order
-      // if (compareTanggal == 0) {
-      // return c1.getDate_created().compareTo(c2.getDate_created());
-      // }
-
-      // return compareTanggal;
-      // });
-
-      // Collections.reverse(filteredProducts);
 
       msg.setMessage("Sukses");
       msg.setData(products);

@@ -13,20 +13,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import heavenscoffee.mainapp.models.Cart;
-import heavenscoffee.mainapp.models.Order;
+import heavenscoffee.mainapp.models.Invoice;
 import heavenscoffee.mainapp.repos.CartRepo;
+import heavenscoffee.mainapp.repos.InvoiceRepo;
 import heavenscoffee.mainapp.utils.MessageModelPagination;
 import heavenscoffee.mainapp.utils.SortingAndAscendingDescending;
 
 @RestController
-@RequestMapping("/cart")
-public class CartController {
+@RequestMapping("/invoice")
+public class InvoiceController {
 
   @Autowired
   SortingAndAscendingDescending sortingAndAscendingDescending;
 
   @Autowired
-  CartRepo cartRepo;
+  InvoiceRepo invoiceRepo;
 
   @GetMapping("/findall")
   public ResponseEntity<MessageModelPagination> findAllOrderPagination(
@@ -39,7 +40,7 @@ public class CartController {
       Sort objSort = sortingAndAscendingDescending.getSortingData(sort, urutan);
       Pageable pageRequest = objSort == null ? PageRequest.of(page, size) : PageRequest.of(page, size, objSort);
 
-      Page<Cart> data = cartRepo.findAll(pageRequest);
+      Page<Invoice> data = invoiceRepo.findAll(pageRequest);
 
       msg.setMessage("Success");
       msg.setData(data.getContent());
@@ -54,5 +55,5 @@ public class CartController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
     }
   }
-
+  
 }

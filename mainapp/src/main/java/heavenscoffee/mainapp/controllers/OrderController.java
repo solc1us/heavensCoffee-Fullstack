@@ -1,5 +1,6 @@
 package heavenscoffee.mainapp.controllers;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +22,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import heavenscoffee.mainapp.dto.CreateOrderRequest;
+import heavenscoffee.mainapp.dto.RequestedItem;
 import heavenscoffee.mainapp.models.Order;
+import heavenscoffee.mainapp.models.OrderItem;
+import heavenscoffee.mainapp.models.Product;
 import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.repos.OrderRepo;
+import heavenscoffee.mainapp.repos.ProductRepo;
 import heavenscoffee.mainapp.utils.MessageModel;
 import heavenscoffee.mainapp.utils.MessageModelPagination;
 import heavenscoffee.mainapp.utils.SortingAndAscendingDescending;
@@ -32,22 +38,65 @@ import heavenscoffee.mainapp.utils.SortingAndAscendingDescending;
 @RestController
 @RequestMapping("/order")
 public class OrderController {
-  
+
   @Autowired
   OrderRepo orderRepo;
 
   @Autowired
+  ProductRepo productRepo;
+
+  @Autowired
   SortingAndAscendingDescending sortingAndAscendingDescending;
 
-  @PostMapping("/createorder")
-  public ResponseEntity<Object> createOrder(@RequestBody Order data) {
+  @PostMapping("/create")
+  public ResponseEntity<Object> createOrder(@RequestBody CreateOrderRequest orderRequest) {
 
     MessageModel msg = new MessageModel();
+
+    System.out.println("tes");
 
     try {
       Order order = new Order();
 
-      order.setAlamat(data.getAlamat());
+      order.setUserId(orderRequest.getUserId());
+      order.setAlamat(orderRequest.getAlamat());
+      order.setMetodePembayaran(orderRequest.getMetodePembayaran());
+      order.setStatusOrder("PENDING");
+
+      int totalTagihan = 0;
+
+      List<OrderItem> orderItems = new ArrayList<>();
+      for (RequestedItem itemDto : orderRequest.getItems()) {
+        // 3. Ambil Product dari database (misal via productService)
+        Optional<Product> optProduct = productRepo.findById(itemDto.getProductId());
+        
+        if (optProduct.isEmpty()) {
+          msg.setMessage("Product tidak ditemukan");
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+        }
+
+        Product product = optProduct.get();
+
+        if (product.getStok() < itemDto.getQuantity()) {
+          return ResponseEntity.badRequest().body("Stok tidak cukup untuk produk: " + product.getNama());
+        }
+
+        // 5. Buat OrderItem
+        OrderItem orderItem = new OrderItem();
+        orderItem.setProduct(product); // atau cuma productId dan info relevan lainnya
+        orderItem.setKuantitas(itemDto.getQuantity());
+        orderItem.setHargaSatuan(product.getHarga());
+        orderItem.setTotalHarga(itemDto.getQuantity() * product.getHarga());
+        totalTagihan += orderItem.getTotalHarga();
+        product.setStok(product.getStok() - itemDto.getQuantity()); // Update stok produk
+        orderItem.setOrder(order);
+
+        orderItems.add(orderItem);
+      }
+
+      order.setOrderItems(orderItems);
+      order.setTotalTagihan(totalTagihan);
+      order.setTanggalPemesanan(LocalDateTime.now());
 
       orderRepo.save(order);
 
@@ -63,7 +112,6 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
     }
   }
-
 
   @PutMapping("/updateorder")
   public ResponseEntity<Object> updateOrder(@RequestBody Order param) {
@@ -82,10 +130,7 @@ public class OrderController {
         Order orderToUpdate = existingOrder.get();
 
         // Update the fields of the order
-        orderToUpdate.setNama(param.getNama());
-        orderToUpdate.setDeskripsi(param.getDeskripsi());
-        orderToUpdate.setHarga(param.getHarga());
-        orderToUpdate.setStok(param.getStok());
+        orderToUpdate.setStatusOrder(param.getStatusOrder());
 
         orderRepo.save(orderToUpdate);
 
@@ -104,6 +149,7 @@ public class OrderController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
     }
   }
+
   @GetMapping("/findall")
   public ResponseEntity<MessageModelPagination> findAllOrderPagination(
       @RequestParam(value = "page", defaultValue = "0") Integer page,
@@ -140,7 +186,7 @@ public class OrderController {
     try {
 
       List<Order> orders = new ArrayList<>();
-     
+
       msg.setMessage("Sukses");
       msg.setData(orders);
       return ResponseEntity.ok(msg);
@@ -185,7 +231,6 @@ public class OrderController {
     return ResponseEntity.status(HttpStatus.OK).body("Semua item berhasil dihapus");
   }
 
-
   @DeleteMapping("/deletebyid/{id}")
   public ResponseEntity<Object> deleteById(@PathVariable("id") String id) {
 
@@ -199,7 +244,8 @@ public class OrderController {
 
         orderRepo.deleteById(id);
 
-        msg.setMessage("Berhasil menghapus order dengan ID: " + order.get().getId() + " pada tanggal: " + order.get().getTanggalPemesanan());
+        msg.setMessage("Berhasil menghapus order dengan ID: " + order.get().getId() + " pada tanggal: "
+            + order.get().getTanggalPemesanan());
         msg.setData(order);
         return ResponseEntity.status(HttpStatus.OK).body(msg);
       } else {
