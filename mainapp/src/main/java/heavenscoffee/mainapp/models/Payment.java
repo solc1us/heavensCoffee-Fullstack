@@ -28,12 +28,18 @@ import lombok.Setter;
 public class Payment {
 
   @Id
-  private String id;
+  private String id = UUID.randomUUID().toString();
 
   @OneToOne
   @JoinColumn(name = "order_id", referencedColumnName = "id")
   @JsonBackReference
   private Order order;
+
+  @OneToOne
+  @JoinColumn(name = "invoice_id", referencedColumnName = "id")
+  @JsonBackReference
+  private Invoice invoice;
+
 
   private String metodePembayaran;
   private int totalTagihan;

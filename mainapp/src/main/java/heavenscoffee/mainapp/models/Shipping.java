@@ -3,8 +3,12 @@ package heavenscoffee.mainapp.models;
 import java.util.Date;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,25 +24,18 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(name = "shipping")
 public class Shipping {
-  
+
   @Id
   private String id = UUID.randomUUID().toString();
-  private String orderId;
+
+  @OneToOne
+  @JoinColumn(name = "order_id", referencedColumnName = "id")
+  @JsonBackReference
+  private Order order;
+
   private String alamat;
   private String nomorResi;
   private String statusPengiriman;
   private Date tanggalKirim;
-
-  public Shipping(String orderId, String alamat) {
-    this.orderId = orderId;
-    this.alamat = alamat;
-    this.nomorResi = UUID.randomUUID().toString();
-    this.statusPengiriman = "Dalam Proses";
-    this.tanggalKirim = new Date();
-  }
-
-  public void updateStatusPengiriman(String statusPengiriman) {
-    this.statusPengiriman = statusPengiriman;
-  }
 
 }

@@ -2,8 +2,10 @@ package heavenscoffee.mainapp.controllers;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,15 +25,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import heavenscoffee.mainapp.dto.CreateOrderRequest;
-import heavenscoffee.mainapp.dto.ItemInCart;
-import heavenscoffee.mainapp.dto.RequestedItem;
 import heavenscoffee.mainapp.models.Cart;
+import heavenscoffee.mainapp.models.Invoice;
 import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.models.OrderItem;
-import heavenscoffee.mainapp.models.Product;
-import heavenscoffee.mainapp.repos.CartRepo;
-import heavenscoffee.mainapp.repos.OrderRepo;
-import heavenscoffee.mainapp.repos.ProductRepo;
+import heavenscoffee.mainapp.models.Payment;
+import heavenscoffee.mainapp.models.Shipping;
+import heavenscoffee.mainapp.repos.*;
 import heavenscoffee.mainapp.utils.MessageModel;
 import heavenscoffee.mainapp.utils.MessageModelPagination;
 import heavenscoffee.mainapp.utils.SortingAndAscendingDescending;
@@ -48,6 +48,15 @@ public class OrderController {
 
   @Autowired
   CartRepo cartRepo;
+
+  @Autowired
+  PaymentRepo paymentRepo;
+
+  @Autowired
+  ShippingRepo shippingRepo;
+
+  @Autowired
+  InvoiceRepo invoiceRepo;
 
   @Autowired
   SortingAndAscendingDescending sortingAndAscendingDescending;
@@ -108,6 +117,47 @@ public class OrderController {
     }
   }
 
+  @PutMapping("/update")
+  public ResponseEntity<Object> updateOrder(@RequestBody HashMap<String, String> payload) {
+
+    MessageModel msg = new MessageModel();
+
+    try {
+      String orderId = payload.get("orderId");
+      if (orderId == null || orderId.isEmpty()) {
+        msg.setMessage("'orderId' is required in the request body.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+      }
+
+      Optional<Order> orderOpt = orderRepo.findById(orderId);
+
+      if (orderOpt.isEmpty()) {
+        msg.setMessage("Order with ID " + orderId + " not found.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+      }
+
+      Order order = orderOpt.get();
+
+      // Update the fields of the order
+      if (payload.containsKey("statusPembayaran")) {
+        order.setStatusOrder(payload.get("statusPembayaran"));
+      }
+      if (payload.containsKey("statusPembayaran") && payload.get("statusPembayaran").equals("PENDING")) {
+        order.setTanggalPembayaran(null);
+      }
+
+      orderRepo.save(order);
+
+      msg.setMessage("Order updated successfully.");
+      msg.setData(order);
+      return ResponseEntity.status(HttpStatus.OK).body(msg);
+
+    } catch (Exception e) {
+      msg.setMessage(e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
+    }
+  }
+
   @PutMapping("/updateorder")
   public ResponseEntity<Object> updateOrder(@RequestBody Order param) {
 
@@ -145,6 +195,79 @@ public class OrderController {
     }
   }
 
+  @PostMapping("/pay")
+  public ResponseEntity<Object> payOrder(@RequestBody HashMap<String, String> payload) {
+
+    MessageModel msg = new MessageModel();
+
+    try {
+      String orderId = payload.get("orderId");
+      if (orderId == null || orderId.isEmpty()) {
+        msg.setMessage("'orderId' is required in the request body.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+      }
+
+      Optional<Order> orderOpt = orderRepo.findById(orderId);
+
+      if (orderOpt.isEmpty()) {
+        msg.setMessage("Order with ID " + orderId + " not found.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+      }
+
+      Order order = orderOpt.get();
+
+      if ("PAID".equals(order.getStatusOrder())) {
+        msg.setMessage("Order with ID " + orderId + " has already been paid.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+      }
+
+      // Create payment
+      Payment payment = new Payment();
+      payment.setOrder(order);
+      payment.setMetodePembayaran(order.getMetodePembayaran());
+      payment.setTotalTagihan(order.getTotalTagihan());
+      payment.setTanggalPembayaran(LocalDateTime.now());
+      payment.setStatusPembayaran("PAID");
+      // paymentRepo.save(payment);
+
+      // Create invoice
+      Invoice invoice = new Invoice();
+      invoice.setOrder(order);
+      invoice.setPayment(payment);
+      invoice.setOrderItems(invoice.getOrder().getOrderItems());
+      invoice.setTanggalDibuat(LocalDateTime.now());
+      order.setInvoice(invoice);
+      payment.setInvoice(invoice);
+
+      // Update the order status to PAID
+      order.setStatusOrder("PAID");
+      order.setPayment(payment);
+      order.setTanggalPembayaran(LocalDateTime.now());
+
+      // Create shipping
+      Shipping shipping = new Shipping();
+      shipping.setAlamat(order.getAlamat());
+      shipping.setNomorResi(Math.floor(Math.random() * 1000000) + "");
+      shipping.setOrder(order);
+      shipping.setStatusPengiriman("PENDING");
+      order.setShipping(shipping);
+
+      // shippingRepo.save(shipping);
+      // invoiceRepo.save(invoice);
+      orderRepo.save(order);
+
+      order.getInvoice().setOrderItems(order.getOrderItems());
+
+      msg.setMessage("Payment successful for order ID: " + orderId);
+      msg.setData(order);
+      return ResponseEntity.status(HttpStatus.OK).body(msg);
+
+    } catch (Exception e) {
+      msg.setMessage(e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
+    }
+  }
+
   @GetMapping("/findall")
   public ResponseEntity<MessageModelPagination> findAllOrderPagination(
       @RequestParam(value = "page", defaultValue = "0") Integer page,
@@ -157,6 +280,13 @@ public class OrderController {
       Pageable pageRequest = objSort == null ? PageRequest.of(page, size) : PageRequest.of(page, size, objSort);
 
       Page<Order> data = orderRepo.findAll(pageRequest);
+
+      // Set orderItems in each invoice before returning
+      for (Order order : data.getContent()) {
+        if (order.getInvoice() != null) {
+          order.getInvoice().setOrderItems(order.getOrderItems());
+        }
+      }
 
       msg.setMessage("Success");
       msg.setData(data.getContent());

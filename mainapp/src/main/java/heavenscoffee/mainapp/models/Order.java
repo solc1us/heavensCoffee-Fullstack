@@ -46,6 +46,14 @@ public class Order {
   @JsonManagedReference
   private Payment payment;
 
+  @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+  @JsonManagedReference
+  private Shipping shipping;
+
+  @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+  @JsonManagedReference
+  private Invoice invoice;
+
   private int hitungTotalTagihan() {
     int total = 0;
     for (OrderItem item : orderItems) {
