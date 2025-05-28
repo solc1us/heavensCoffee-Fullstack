@@ -1,9 +1,7 @@
 
 package heavenscoffee.mainapp.controllers;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,13 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import heavenscoffee.mainapp.models.Cart;
 import heavenscoffee.mainapp.models.User;
 import heavenscoffee.mainapp.repos.UserRepo;
-import heavenscoffee.mainapp.services.CartService;
 import heavenscoffee.mainapp.services.HeavensCoffeeService;
-import heavenscoffee.mainapp.services.ProductService;
-import heavenscoffee.mainapp.services.UserService;
 import heavenscoffee.mainapp.utils.MessageModel;
 
 @RestController

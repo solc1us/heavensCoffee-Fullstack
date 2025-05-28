@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import heavenscoffee.mainapp.models.Cart;
 import heavenscoffee.mainapp.models.Invoice;
-import heavenscoffee.mainapp.repos.CartRepo;
 import heavenscoffee.mainapp.repos.InvoiceRepo;
 import heavenscoffee.mainapp.utils.MessageModelPagination;
 import heavenscoffee.mainapp.utils.SortingAndAscendingDescending;

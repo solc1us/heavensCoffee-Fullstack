@@ -11,7 +11,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +27,7 @@ import heavenscoffee.mainapp.dto.RequestedItem;
 import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.models.OrderItem;
 import heavenscoffee.mainapp.models.Product;
+import heavenscoffee.mainapp.repos.CartRepo;
 import heavenscoffee.mainapp.repos.OrderRepo;
 import heavenscoffee.mainapp.repos.ProductRepo;
 import heavenscoffee.mainapp.utils.MessageModel;
@@ -45,14 +45,15 @@ public class OrderController {
   ProductRepo productRepo;
 
   @Autowired
+  CartRepo cartRepo;
+
+  @Autowired
   SortingAndAscendingDescending sortingAndAscendingDescending;
 
   @PostMapping("/create")
   public ResponseEntity<Object> createOrder(@RequestBody CreateOrderRequest orderRequest) {
 
     MessageModel msg = new MessageModel();
-
-    System.out.println("tes");
 
     try {
       Order order = new Order();
@@ -66,9 +67,9 @@ public class OrderController {
 
       List<OrderItem> orderItems = new ArrayList<>();
       for (RequestedItem itemDto : orderRequest.getItems()) {
-        
+
         Optional<Product> optProduct = productRepo.findById(itemDto.getProductId());
-        
+
         if (optProduct.isEmpty()) {
           msg.setMessage("Product tidak ditemukan");
           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
@@ -89,6 +90,7 @@ public class OrderController {
         totalTagihan += orderItem.getTotalHarga();
         product.setStok(product.getStok() - itemDto.getQuantity()); // Update stok produk
         orderItem.setOrder(order);
+        orderItem.setCart(cartRepo.findByUserId(order.getUserId()).get());
 
         orderItems.add(orderItem);
       }

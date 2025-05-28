@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.models.OrderItem;
 import heavenscoffee.mainapp.repos.OrderItemRepo;
 import heavenscoffee.mainapp.utils.MessageModelPagination;

@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import heavenscoffee.mainapp.dto.ItemInCart;
-import heavenscoffee.mainapp.dto.CreateOrderRequest;
 import heavenscoffee.mainapp.models.Cart;
-import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.models.OrderItem;
 import heavenscoffee.mainapp.models.Product;
 import heavenscoffee.mainapp.repos.CartRepo;
@@ -169,6 +167,8 @@ public class CartController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
           } else if (quantity == item.getKuantitas()) {
             cart.getOrderItem().remove(item); // Remove item completely
+            product.setStok(product.getStok() + quantity); // Update stok produk
+            cartRepo.save(cart);
             msg.setMessage(product.getNama() + " removed from cart successfully");
             return ResponseEntity.status(HttpStatus.OK).body(msg);
           } else {
