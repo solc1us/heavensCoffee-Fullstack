@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import heavenscoffee.mainapp.dto.CreateOrderRequest;
+import heavenscoffee.mainapp.dto.ItemInCart;
 import heavenscoffee.mainapp.dto.RequestedItem;
+import heavenscoffee.mainapp.models.Cart;
 import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.models.OrderItem;
 import heavenscoffee.mainapp.models.Product;
@@ -63,42 +65,34 @@ public class OrderController {
       order.setMetodePembayaran(orderRequest.getMetodePembayaran());
       order.setStatusOrder("PENDING");
 
-      int totalTagihan = 0;
+      // 1. Fetch the user's cart
+      Optional<Cart> optCart = cartRepo.findByUserId(orderRequest.getUserId());
+      if (optCart.isEmpty()) {
+        msg.setMessage("Cart not found for user: " + orderRequest.getUserId());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+      }
+      Cart cart = optCart.get();
 
-      List<OrderItem> orderItems = new ArrayList<>();
-      for (RequestedItem itemDto : orderRequest.getItems()) {
-
-        Optional<Product> optProduct = productRepo.findById(itemDto.getProductId());
-
-        if (optProduct.isEmpty()) {
-          msg.setMessage("Product tidak ditemukan");
-          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
-        }
-
-        Product product = optProduct.get();
-
-        if (product.getStok() < itemDto.getQuantity()) {
-          msg.setMessage("Stok tidak cukup untuk produk: " + product.getNama());
-          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
-        }
-
-        OrderItem orderItem = new OrderItem();
-        orderItem.setProduct(product);
-        orderItem.setKuantitas(itemDto.getQuantity());
-        orderItem.setHargaSatuan(product.getHarga());
-        orderItem.setTotalHarga(itemDto.getQuantity() * product.getHarga());
-        totalTagihan += orderItem.getTotalHarga();
-        product.setStok(product.getStok() - itemDto.getQuantity()); // Update stok produk
-        orderItem.setOrder(order);
-        orderItem.setCart(cartRepo.findByUserId(order.getUserId()).get());
-
-        orderItems.add(orderItem);
+      // 2. Get all items from the cart
+      List<OrderItem> cartItems = cart.getOrderItem();
+      if (cartItems == null || cartItems.isEmpty()) {
+        msg.setMessage("Cart is empty.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
       }
 
-      order.setOrderItems(orderItems);
+      int totalTagihan = 0;
+      for (OrderItem item : cartItems) {
+        // 3. Assign the new order to each item
+        item.setOrder(order);
+        totalTagihan += item.getTotalHarga();
+      }
+
+      // 4. Assign items to the order
+      order.setOrderItems(cartItems);
       order.setTotalTagihan(totalTagihan);
       order.setTanggalPemesanan(LocalDateTime.now());
 
+      // 5. Save the order (cascades to items)
       orderRepo.save(order);
 
       msg.setMessage("Success");
