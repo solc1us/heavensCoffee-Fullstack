@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import heavenscoffee.mainapp.dto.CreateOrderRequest;
 import heavenscoffee.mainapp.models.Cart;
+import heavenscoffee.mainapp.models.Feedback;
 import heavenscoffee.mainapp.models.Invoice;
 import heavenscoffee.mainapp.models.Order;
 import heavenscoffee.mainapp.models.OrderItem;
@@ -56,6 +57,9 @@ public class OrderController {
 
   @Autowired
   InvoiceRepo invoiceRepo;
+
+  @Autowired
+  FeedbackRepo feedbackRepo;
 
   @Autowired
   SortingAndAscendingDescending sortingAndAscendingDescending;
@@ -347,6 +351,53 @@ public class OrderController {
 
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+  }
+
+  @PostMapping("/feedback")
+  public ResponseEntity<Object> addFeedback(@RequestBody HashMap<String, String> payload) {
+
+    MessageModel msg = new MessageModel();
+
+    try {
+      String orderId = payload.get("orderId");
+      String komentar = payload.get("komentar");
+      int rating = Integer.parseInt(payload.get("rating"));
+
+      if (orderId == null) {
+        msg.setMessage("'orderId' is required in the request body.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+      }
+
+      Optional<Order> orderOpt = orderRepo.findById(orderId);
+
+      if (orderOpt.isEmpty()) {
+        msg.setMessage("Order with ID " + orderId + " not found.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+      }
+
+      Order order = orderOpt.get();
+
+      // Create feedback
+      Feedback feedback = new Feedback();
+      feedback.setUserId(order.getUserId());
+      feedback.setOrder(order);
+      feedback.setKomentar(komentar);
+      feedback.setRating(rating); // Default rating, can be changed later
+      feedback.setTanggal(LocalDateTime.now());
+      order.setFeedback(feedback);
+      // Save feedback
+      // feedbackRepo.save(feedback);
+      // Update order with feedback
+      orderRepo.save(order);
+
+      msg.setMessage("Feedback added successfully for order ID: " + orderId);
+      msg.setData(feedback);
+      return ResponseEntity.status(HttpStatus.OK).body(msg);
+
+    } catch (Exception e) {
+      msg.setMessage(e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
     }
   }
 

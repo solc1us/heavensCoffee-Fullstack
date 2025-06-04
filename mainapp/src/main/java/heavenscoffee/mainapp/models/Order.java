@@ -54,6 +54,9 @@ public class Order {
   @JsonManagedReference
   private Invoice invoice;
 
+  @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+  private Feedback feedback;
+
   public void updateOrderStatus(String statusOrder) {
     this.statusOrder = statusOrder;
   }
