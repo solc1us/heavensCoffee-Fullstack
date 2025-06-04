@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,6 +66,36 @@ public class CartController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
     }
   }
+
+  @GetMapping("/findbyuserid/{userid}")
+  public ResponseEntity<Object> findOrderById(
+      @PathVariable("userid") String userId) {
+
+    MessageModel msg = new MessageModel();
+
+    try {
+
+      if (userId.isEmpty() || userId == null) {
+        msg.setMessage("'userId' is required in the request param.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+      }
+
+      Optional<Cart> cart = cartRepo.findByUserId(userId);
+
+      if (!cart.isPresent() || cart == null) {
+        msg.setMessage("'user id' yang anda masukkan salah (tidak ada di database).");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+      }
+
+      msg.setMessage("Sukses");
+      msg.setData(cart);
+      return ResponseEntity.ok(msg);
+
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
+  }
+
 
   @PostMapping("/additem")
   public ResponseEntity<Object> addItemToCart(@RequestBody ItemInCart addItemToCart) {

@@ -54,14 +54,6 @@ public class Order {
   @JsonManagedReference
   private Invoice invoice;
 
-  private int hitungTotalTagihan() {
-    int total = 0;
-    for (OrderItem item : orderItems) {
-      total += item.getTotalHarga();
-    }
-    return total;
-  }
-
   public void updateOrderStatus(String statusOrder) {
     this.statusOrder = statusOrder;
   }

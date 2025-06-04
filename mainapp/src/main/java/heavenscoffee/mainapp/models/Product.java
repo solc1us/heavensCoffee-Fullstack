@@ -1,6 +1,5 @@
 package heavenscoffee.mainapp.models;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;

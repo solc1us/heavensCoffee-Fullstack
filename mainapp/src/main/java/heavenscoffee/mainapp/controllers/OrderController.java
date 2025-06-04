@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -247,7 +246,9 @@ public class OrderController {
       // Create shipping
       Shipping shipping = new Shipping();
       shipping.setAlamat(order.getAlamat());
-      shipping.setNomorResi(Math.floor(Math.random() * 1000000) + "");
+      
+      String randomResi = "R-ID000" + String.format("%09d", (int)(Math.random() * 1_000_000_000));
+      shipping.setNomorResi(randomResi);
       shipping.setOrder(order);
       shipping.setStatusPengiriman("PENDING");
       order.setShipping(shipping);
