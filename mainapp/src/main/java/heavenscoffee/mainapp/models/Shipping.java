@@ -1,5 +1,6 @@
 package heavenscoffee.mainapp.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -36,6 +37,6 @@ public class Shipping {
   private String alamat;
   private String nomorResi;
   private String statusPengiriman;
-  private Date tanggalKirim;
+  private LocalDateTime tanggalKirim;
 
 }

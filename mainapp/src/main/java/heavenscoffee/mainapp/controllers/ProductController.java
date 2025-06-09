@@ -45,6 +45,30 @@ public class ProductController {
     MessageModel msg = new MessageModel();
 
     try {
+
+      if (data.getNama() == null || data.getNama().isEmpty()) {
+        msg.setMessage("Nama is required in the request body.");
+        return ResponseEntity.badRequest().body(msg);
+      }
+
+      if (data.getHarga() <= 0) {
+        msg.setMessage("Harga is required in the request body and must be greater than 0.");
+        return ResponseEntity.badRequest().body(msg);
+      }
+
+      if (data.getStok() < 0) {
+        return ResponseEntity.badRequest().body("Stok is required in the request body and must be 0 or greater.");
+      }
+
+      if (data.getKategori() == null || data.getKategori().isEmpty()) {
+        return ResponseEntity.badRequest().body("Kategori is required in the request body.");
+      }
+
+      if (productRepo.findByNama(data.getNama()).isPresent()) {
+        msg.setMessage("Nama product already exists.");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(msg);
+      }
+
       Product product = new Kopi();
 
       product.setNama(data.getNama());
