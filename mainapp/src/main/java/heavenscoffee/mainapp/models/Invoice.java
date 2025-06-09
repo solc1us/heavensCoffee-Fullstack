@@ -1,7 +1,6 @@
 package heavenscoffee.mainapp.models;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,21 +48,4 @@ public class Invoice {
 
   private LocalDateTime tanggalDibuat;
 
-  // public Invoice(Product[] products, Payment payment) {
-  // this.products = products;
-  // this.payment = payment;
-  // this.tanggalDibuat = new Date();
-  // }
-
-  // public void cetakInvoice() {
-  //   System.out.println("ID Invoice: " + id);
-  //   System.out.println("Tanggal Dibuat: " + tanggalDibuat);
-  //   System.out.println("Daftar Produk:");
-  //   for (OrderItem item : orderItems) {
-  //     System.out.printf("%-24s %-15s %-15s %-40s%n", item.getProduct().getNama(), item.getKuantitas(),
-  //         item.getHargaSatuan(), item.getTotalHarga());
-  //   }
-  //   System.out.println("Metode Pembayaran: " + payment.getMetodePembayaran());
-  //   System.out.println("Total Tagihan: " + payment.getTotalTagihan());
-  // }
 }

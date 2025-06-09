@@ -57,17 +57,9 @@ public class Order {
   @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
   private Feedback feedback;
 
-  public void updateOrderStatus(String statusOrder) {
+  public void setStatusOrder(String statusOrder) {
     this.statusOrder = statusOrder;
   }
 
-  public void createShipping() {
-    // this.shipping = new Shipping(id, alamat);
-  }
-
-  public void createPayment() {
-    // this.payment = new Payment(id, metodePembayaran, totalTagihan,
-    // tanggalPembayaran, statusOrder);
-  }
 
 }

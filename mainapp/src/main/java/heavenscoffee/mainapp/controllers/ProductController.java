@@ -60,9 +60,7 @@ public class ProductController {
 
       return ResponseEntity.status(HttpStatus.OK).body(msg);
 
-    } catch (
-
-    Exception e) {
+    } catch (Exception e) {
       msg.setMessage(e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
     }
@@ -233,24 +231,6 @@ public class ProductController {
     } catch (Exception e) {
       msg.setMessage(e.getMessage());
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
-    }
-  }
-
-  @GetMapping("/find")
-  public ResponseEntity<Object> findProduct() {
-
-    MessageModel msg = new MessageModel();
-
-    try {
-
-      List<Product> products = new ArrayList<>();
-
-      msg.setMessage("Sukses");
-      msg.setData(products);
-      return ResponseEntity.ok(msg);
-
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
   }
 

@@ -43,7 +43,9 @@ public class InvoiceController {
       @RequestParam(value = "size", defaultValue = "10") Integer size,
       @RequestParam(value = "sort", required = false) String sort,
       @RequestParam(value = "urutan", required = false) String urutan) {
+        
     MessageModelPagination msg = new MessageModelPagination();
+
     try {
       Sort objSort = sortingAndAscendingDescending.getSortingData(sort, urutan);
       Pageable pageRequest = objSort == null ? PageRequest.of(page, size) : PageRequest.of(page, size, objSort);

@@ -39,7 +39,6 @@ public class Payment {
   @JsonBackReference
   private Invoice invoice;
 
-
   private String metodePembayaran;
   private int totalTagihan;
   private LocalDateTime tanggalPembayaran;

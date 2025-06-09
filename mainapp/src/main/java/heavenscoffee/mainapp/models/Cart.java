@@ -53,19 +53,4 @@ public class Cart {
         this.orderItem.add(orderItem);
     }
 
-    public void showCart() {
-
-        System.out.println("=========================");
-        System.out.println("Order Items: ");
-
-        if (orderItem != null) {
-            System.out.println("Nama \t\t\t Kuantitas \t Harga Satuan \t Total Harga");
-            for (OrderItem item : orderItem) {
-                item.showOrderItem();
-
-            }
-        } else {
-            System.out.println("Tidak ada barang di cart");
-        }
-    }
 }

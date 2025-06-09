@@ -33,11 +33,6 @@ public abstract class Product {
     this.harga = harga;
     this.stok = stok;
   }
-
-  public void showProduct() {
-    // System.out.println(nama + " \t " + deskripsi + " \t " + harga + " \t " + stok);
-    System.out.printf("%-23s %-39s %-15s %-40s%n", nama, deskripsi, harga, stok);
-  }
   
   public String getNama() {
     return nama;

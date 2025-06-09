@@ -378,6 +378,11 @@ public class OrderController {
 
       Order order = orderOpt.get();
 
+      if (order.getFeedback() != null) {
+        msg.setMessage("Feedback for order ID " + orderId + " already exists.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
+      }
+
       // Create feedback
       Feedback feedback = new Feedback();
       feedback.setUserId(order.getUserId());

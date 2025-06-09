@@ -13,7 +13,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-// @Table(name = "shipping")
 public class Kopi extends Product {
   private String kategori;
 

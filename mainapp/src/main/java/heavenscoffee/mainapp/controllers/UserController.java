@@ -41,17 +41,13 @@ public class UserController {
   @Autowired
   SortingAndAscendingDescending sortingAndAscendingDescending;
 
-    UserController(CartRepo cartRepo) {
-        this.cartRepo = cartRepo;
-    }
-
   @PostMapping("/create")
   public ResponseEntity<Object> createUser(@RequestBody User data) {
 
     MessageModel msg = new MessageModel();
 
     try {
-      User user = new User();
+      User user = new User(); 
 
       user.setUsername(data.getUsername());
       user.setPassword(data.getPassword());
@@ -78,7 +74,9 @@ public class UserController {
       @RequestParam(value = "size", defaultValue = "10") Integer size,
       @RequestParam(value = "sort", required = false) String sort,
       @RequestParam(value = "urutan", required = false) String urutan) {
+
     MessageModelPagination msg = new MessageModelPagination();
+    
     try {
       Sort objSort = sortingAndAscendingDescending.getSortingData(sort, urutan);
       Pageable pageRequest = objSort == null ? PageRequest.of(page, size) : PageRequest.of(page, size, objSort);
@@ -100,7 +98,7 @@ public class UserController {
   }
 
   @PutMapping("/update")
-  public ResponseEntity<Object> updateBatch(@RequestBody User param) {
+  public ResponseEntity<Object> update(@RequestBody User param) {
 
     MessageModel msg = new MessageModel();
 

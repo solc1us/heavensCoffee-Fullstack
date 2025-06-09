@@ -45,12 +45,6 @@ public class OrderItem {
     private int hargaSatuan;
     private int totalHarga;
 
-   
-
-    public void showOrderItem() {
-        System.out.printf("%-24s %-15s %-15s %-40s%n", product.getNama(), kuantitas, hargaSatuan, totalHarga);
-    }
-
     public int getTotalHarga() {
         return totalHarga;
     }
